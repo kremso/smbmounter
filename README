@@ -1,0 +1,41 @@
+Info
+-----
+
+This script mounts samba shares. It's intended to be used as
+a firefox protocol handler for smb://
+It may however be used from any application which supports
+protocol handlers or terminal.
+
+Dependencies: smbclient, mount.cifs
+
+You can see it in action here: http://www.youtube.com/watch?v=t58Y_GXT9WM
+
+Instructions 
+-------------
+
+mount.cifs needs to run as root, so modify /etc/sudoers and set
+passwordless permission for either mount.cifs or this script
+
+This is the sample line that will alow this for members of the
+wheel group.
+
+  %wheel        ALL=NOPASSWD: /sbin/mount.cifs
+
+Firefox protocol HOWTO:
+-----------------------
+
+In firefox open about:config and create new _boolean_ property
+
+   network.protocol-handler.external.smb = true
+
+and new string property
+
+    network.protocol-handler.app.smb
+
+Leave this one empty -- for now. Click on some smb link, the format
+should be smb://hostname_or_ip/
+The dialog will popup asking for external application to launch.
+Select this script and check "Remember".
+
+It currently doesn't work with firefox 3.5b4. It is not the issue with 
+this script, but rather with how to set it as firefox protocol handler.

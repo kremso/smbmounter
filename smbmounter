@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Instructions:
+# In firefox open about:config and create new _boolean_ property
+#
+#    network.protocol-handler.external.smb = true
+#
+# and new string property 
+#
+#     network.protocol-handler.app.smb
+#
+# Leave this one empty -- for now. Click on some smb link, the format
+# should be smb://hostname_or_ip/
+# The dialog will popup asking for external application to launch.
+# Select this script and check "Remember".
+#
+# mount.cifs needs to run as root, so modify /etc/sudoers and set
+# passwordless permission for either mount.cifs or this script
+# 
+# This is the sample line that will alow this for members of the 
+# wheel group.
+#
+# %wheel	ALL=NOPASSWD: /sbin/mount.cifs
+#
+# Dependencies: smbclient, mount.cifs
+
+FM=thunar
+MOUNT_ROOT=/media/samba
+
+if [[ "$1" =~ smb://(.*?)/ ]]; then
+    host=${BASH_REMATCH[1]}
+else
+    echo "$1: No match"
+    exit 1
+fi
+
+list=`smbclient -N -L "$host" 2>/dev/null | grep Disk | grep -v '\\$' | awk '{print $1}'`
+
+for share in $list; do
+    echo "Mounting $share .."
+    mount_dir=$MOUNT_ROOT/$host/$share
+    mkdir -p $mount_dir
+    sudo mount.cifs //$host/$share $mount_dir -o guest
+done
+
+# xdg-open?
+$FM $MOUNT_ROOT/$host
